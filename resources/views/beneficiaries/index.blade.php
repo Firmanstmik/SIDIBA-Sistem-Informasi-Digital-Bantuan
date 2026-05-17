@@ -133,6 +133,7 @@
                     <th class="px-4 py-3 text-left font-medium text-gray-700">Nomor HP</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-700">Alamat</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-700">Jenis Bantuan</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-700">Kuantitas</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-700">Tahun</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-700">Sumber Dana</th>
                     <th class="px-4 py-3 text-left font-medium text-gray-700">Status</th>
@@ -161,6 +162,12 @@
                     </td>
                     <td class="px-4 py-3">{{ Str::limit($item->alamat, 50) }}</td>
                     <td class="px-4 py-3">{{ $item->jenis_bantuan }}</td>
+                    <td class="px-4 py-3">
+                        @php
+                            $bantuan = \App\Models\Bantuan::where('nama_bantuan', $item->jenis_bantuan)->first();
+                        @endphp
+                        {{ $item->kuantitas ?? 1 }} {{ $bantuan ? $bantuan->satuan : '' }}
+                    </td>
                     <td class="px-4 py-3">
                         <span class="bg-gray-800 text-white text-xs font-medium px-2.5 py-0.5 rounded">{{ $item->tahun }}</span>
                     </td>
