@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Beneficiary;
 use App\Models\Bantuan;
+use Illuminate\Support\Collection;
 
 class BeneficiaryController extends Controller
 {
@@ -337,12 +338,12 @@ class BeneficiaryController extends Controller
     }
 
     // Method lainnya yang sudah ada (import, export, dll) tetap dipertahankan
-    public function import(Request $request)
+    public function import()
     {
         // Kode import yang sudah ada
     }
 
-    public function export(Request $request)
+    public function export()
     {
         // Kode export yang sudah ada
     }
@@ -526,7 +527,7 @@ class BeneficiaryController extends Controller
     /**
      * Generate simple Excel file using CSV format with Excel headers
      */
-    private function generateSimpleExcel($data, $filename)
+    private function generateSimpleExcel(Collection $data, string $filename)
     {
         // Create output
         $output = '';
@@ -583,7 +584,7 @@ class BeneficiaryController extends Controller
     /**
      * Convert array to CSV line
      */
-    private function arrayToCsv($array)
+    private function arrayToCsv(array $array): string
     {
         return implode(',', $array) . "\n";
     }
@@ -591,11 +592,13 @@ class BeneficiaryController extends Controller
     /**
      * Escape CSV values
      */
-    private function escapeCsv($value)
+    private function escapeCsv(mixed $value): string
     {
         if (is_numeric($value)) {
-            return $value;
+            return (string) $value;
         }
+
+        $value = (string) $value;
         
         // Escape quotes and wrap in quotes if contains comma, quote, or newline
         if (strpos($value, ',') !== false || strpos($value, '"') !== false || strpos($value, "\n") !== false) {
@@ -608,7 +611,7 @@ class BeneficiaryController extends Controller
     /**
      * Get status text for export
      */
-    private function getStatusText($status)
+    private function getStatusText(string $status): string
     {
         $statuses = [
             'terdaftar' => 'Terdaftar',
@@ -694,7 +697,7 @@ class BeneficiaryController extends Controller
     /**
      * Generate HTML table for Excel export
      */
-    private function generateHtmlTable($data)
+    private function generateHtmlTable(Collection $data): string
     {
         $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
 <head>

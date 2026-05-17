@@ -190,7 +190,7 @@
                     </div>
                     
                     <!-- Peta Leaflet -->
-                    <div id="map" class="w-full h-64 rounded-lg border border-gray-300"></div>
+                    <div id="map" class="w-full h-64 rounded-lg border border-gray-300" data-original-lat="{{ $beneficiary->latitude }}" data-original-lng="{{ $beneficiary->longitude }}"></div>
                     
                     <div class="mt-3 text-sm text-gray-600">
                         <span id="locationStatus">
@@ -279,15 +279,22 @@ document.addEventListener('DOMContentLoaded', function() {
     let zoomLevel = 10;
 
     // Original coordinates from database
-    const originalLat = {{ $beneficiary->latitude ?: 'null' }};
-    const originalLng = {{ $beneficiary->longitude ?: 'null' }};
+    const mapElement = document.getElementById('map');
+    if (!mapElement || typeof L === 'undefined') {
+        return;
+    }
+
+    const originalLatRaw = mapElement.dataset.originalLat;
+    const originalLngRaw = mapElement.dataset.originalLng;
+    const originalLat = originalLatRaw !== undefined && originalLatRaw !== null && originalLatRaw !== '' ? parseFloat(originalLatRaw) : null;
+    const originalLng = originalLngRaw !== undefined && originalLngRaw !== null && originalLngRaw !== '' ? parseFloat(originalLngRaw) : null;
 
     // Initialize map - use original coordinates if available, otherwise default
-    const initialLat = originalLat || defaultLat;
-    const initialLng = originalLng || defaultLng;
-    const initialZoom = originalLat ? 15 : zoomLevel;
+    const initialLat = originalLat !== null ? originalLat : defaultLat;
+    const initialLng = originalLng !== null ? originalLng : defaultLng;
+    const initialZoom = originalLat !== null && originalLng !== null ? 15 : zoomLevel;
     
-    const map = L.map('map').setView([initialLat, initialLng], initialZoom);
+    const map = L.map(mapElement).setView([initialLat, initialLng], initialZoom);
 
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -371,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Get current location
-    btnCurrentLocation.addEventListener('click', function() {
+    if (btnCurrentLocation) btnCurrentLocation.addEventListener('click', function() {
         locationStatus.textContent = 'Mendapatkan lokasi...';
         locationStatus.className = 'text-sm text-blue-600';
         
@@ -416,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Reset map
-    btnResetMap.addEventListener('click', function() {
+    if (btnResetMap) btnResetMap.addEventListener('click', function() {
         map.setView([defaultLat, defaultLng], zoomLevel);
         if (marker) {
             map.removeLayer(marker);
@@ -430,8 +437,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Use original location
-    btnUseOriginal.addEventListener('click', function() {
-        if (originalLat && originalLng) {
+    if (btnUseOriginal) btnUseOriginal.addEventListener('click', function() {
+        if (originalLat !== null && originalLng !== null) {
             addMarker(originalLat, originalLng);
             locationStatus.textContent = `Lokasi asli dipulihkan: ${originalLat}, ${originalLng}`;
             locationStatus.className = 'text-sm text-green-600';
@@ -442,7 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Update map from manual input
-    btnUpdateFromInput.addEventListener('click', function() {
+    if (btnUpdateFromInput) btnUpdateFromInput.addEventListener('click', function() {
         const lat = latitudeInput.value.trim();
         const lng = longitudeInput.value.trim();
         
@@ -466,12 +473,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // If editing and coordinates exist, add marker initially
-    if (originalLat && originalLng) {
+    if (originalLat !== null && originalLng !== null) {
         addMarker(originalLat, originalLng);
     }
 
     // Form validation for coordinates
-    document.getElementById('beneficiaryForm').addEventListener('submit', function(e) {
+    const beneficiaryForm = document.getElementById('beneficiaryForm');
+    if (beneficiaryForm) beneficiaryForm.addEventListener('submit', function(e) {
         const lat = latitudeInput.value.trim();
         const lng = longitudeInput.value.trim();
         
