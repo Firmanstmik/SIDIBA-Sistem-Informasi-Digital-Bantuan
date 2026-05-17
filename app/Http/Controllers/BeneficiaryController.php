@@ -14,7 +14,8 @@ class BeneficiaryController extends Controller
         $jenis = $request->get('jenis', '');
         $bidang = $request->get('bidang', '');
         $search_nik = $request->get('search_nik', '');
-        $sort = $request->get('sort', 'newest'); // Default sorting terbaru
+        $sumber_dana = $request->get('sumber_dana', '');
+        $sort = $request->get('sort', 'newest');
         
         $query = Beneficiary::query();
         
@@ -32,6 +33,10 @@ class BeneficiaryController extends Controller
             $query->where('jenis_bantuan', $jenis);
         }
         
+        if ($sumber_dana) {
+            $query->where('sumber_dana', $sumber_dana);
+        }
+        
         // Pencarian by NIK
         if ($search_nik) {
             $query->where('nik', 'like', '%' . $search_nik . '%');
@@ -40,17 +45,17 @@ class BeneficiaryController extends Controller
         // Apply sorting berdasarkan parameter
         switch ($sort) {
             case 'oldest':
-                $query->orderBy('created_at', 'asc'); // Terlama ke terbaru
+                $query->orderBy('created_at', 'asc');
                 break;
             case 'name_asc':
-                $query->orderBy('nama', 'asc'); // Nama A-Z
+                $query->orderBy('nama', 'asc');
                 break;
             case 'name_desc':
-                $query->orderBy('nama', 'desc'); // Nama Z-A
+                $query->orderBy('nama', 'desc');
                 break;
             case 'newest':
             default:
-                $query->orderBy('created_at', 'desc'); // Terbaru ke terlama (DEFAULT)
+                $query->orderBy('created_at', 'desc');
                 break;
         }
         
@@ -59,14 +64,15 @@ class BeneficiaryController extends Controller
         $tahun_list = Beneficiary::distinct()->orderBy('tahun', 'desc')->pluck('tahun');
         $jenis_list = Beneficiary::distinct()->orderBy('jenis_bantuan')->pluck('jenis_bantuan');
         $bidang_list = Beneficiary::distinct()->orderBy('bidang')->pluck('bidang');
+        $sumber_dana_list = Beneficiary::distinct()->orderBy('sumber_dana')->pluck('sumber_dana')->filter();
         
         $bantuan_list = auth()->user()->role === 'user' 
             ? Bantuan::where('bidang', auth()->user()->bidang)->get()
             : Bantuan::all();
 
         return view('beneficiaries.index', compact(
-            'data', 'tahun_list', 'jenis_list', 'bidang_list', 'bantuan_list',
-            'tahun', 'jenis', 'bidang', 'search_nik', 'sort'
+            'data', 'tahun_list', 'jenis_list', 'bidang_list', 'sumber_dana_list', 'bantuan_list',
+            'tahun', 'jenis', 'bidang', 'sumber_dana', 'search_nik', 'sort'
         ));
     }
 

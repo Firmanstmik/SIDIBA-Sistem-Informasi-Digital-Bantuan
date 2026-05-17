@@ -45,7 +45,7 @@
     </div>
     <div class="p-6">
         <form method="GET" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-{{ auth()->user()->role == 'admin' ? '5' : '4' }} gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-{{ auth()->user()->role == 'admin' ? '6' : '5' }} gap-4">
                 <div>
                     <label class="block text-gray-700 text-sm font-medium mb-2">🔍 Cari NIK</label>
                     <input type="text" name="search_nik" value="{{ request('search_nik') }}" 
@@ -67,6 +67,15 @@
                         <option value="">Semua Jenis</option>
                         @foreach($jenis_list as $jenis_item)
                             <option value="{{ $jenis_item }}" {{ request('jenis') == $jenis_item ? 'selected' : '' }}>{{ $jenis_item }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Sumber Dana</label>
+                    <select name="sumber_dana" class="w-full border border-gray-300 rounded-lg px-3 py-2" onchange="this.form.submit()">
+                        <option value="">Semua Sumber Dana</option>
+                        @foreach($sumber_dana_list as $sumber_item)
+                            <option value="{{ $sumber_item }}" {{ request('sumber_dana') == $sumber_item ? 'selected' : '' }}>{{ $sumber_item }}</option>
                         @endforeach
                     </select>
                 </div>

@@ -59,10 +59,10 @@
 
                 <div>
                     <label class="block text-gray-700 text-sm font-medium mb-2">Jenis Bantuan *</label>
-                    <select name="jenis_bantuan" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                    <select name="jenis_bantuan" id="jenisBantuanSelect" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
                         <option value="">Pilih Jenis Bantuan</option>
                         @foreach($bantuan_list as $bantuan)
-                            <option value="{{ $bantuan->nama_bantuan }}" {{ old('jenis_bantuan') == $bantuan->nama_bantuan ? 'selected' : '' }}>
+                            <option value="{{ $bantuan->nama_bantuan }}" data-satuan="{{ $bantuan->satuan }}" {{ old('jenis_bantuan') == $bantuan->nama_bantuan ? 'selected' : '' }}>
                                 {{ $bantuan->nama_bantuan }}
                             </option>
                         @endforeach
@@ -78,9 +78,12 @@
 
                 <div>
                     <label class="block text-gray-700 text-sm font-medium mb-2">Kuantitas</label>
-                    <input type="number" name="kuantitas" value="{{ old('kuantitas', 1) }}" 
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                           min="1" placeholder="Jumlah bantuan">
+                    <div class="flex items-center space-x-2">
+                        <input type="number" name="kuantitas" value="{{ old('kuantitas', 1) }}" 
+                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2" 
+                               min="1" placeholder="Jumlah bantuan">
+                        <span id="satuanText" class="text-gray-600 font-medium">-</span>
+                    </div>
                 </div>
 
                 <div>
@@ -532,6 +535,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========== Sumber Dana Toggle ==========
     const sumberDanaSelect = document.getElementById('sumberDanaSelect');
     const sumberDanaLainnya = document.getElementById('sumberDanaLainnya');
+    const jenisBantuanSelect = document.getElementById('jenisBantuanSelect');
+    const satuanText = document.getElementById('satuanText');
+
+    if (jenisBantuanSelect && satuanText) {
+        function updateSatuan() {
+            const selectedOption = jenisBantuanSelect.options[jenisBantuanSelect.selectedIndex];
+            const satuan = selectedOption.getAttribute('data-satuan');
+            satuanText.textContent = satuan || '-';
+        }
+        
+        updateSatuan();
+        
+        jenisBantuanSelect.addEventListener('change', updateSatuan);
+    }
 
     if (sumberDanaSelect && sumberDanaLainnya) {
         // Check initial value
@@ -936,18 +953,36 @@ document.addEventListener('DOMContentLoaded', function() {
             const firstData = existingData[0];
             
             // Fill form with existing data
-            document.querySelector('input[name="nama"]').value = firstData.nama;
-            document.querySelector('textarea[name="alamat"]').value = firstData.alamat;
+            const namaInput = document.querySelector('input[name="nama"]');
+            const alamatInput = document.querySelector('textarea[name="alamat"]');
+            const nomorHapeInput = document.querySelector('input[name="nomor_hape"]');
+            const kelompokTaniInput = document.querySelector('input[name="kelompok_tani"]');
+            const nikInputEl = document.querySelector('input[name="nik"]');
+            
+            namaInput.value = firstData.nama;
+            alamatInput.value = firstData.alamat;
             if (firstData.nomor_hape) {
-                document.querySelector('input[name="nomor_hape"]').value = firstData.nomor_hape;
+                nomorHapeInput.value = firstData.nomor_hape;
             }
             if (firstData.kelompok_tani) {
-                document.querySelector('input[name="kelompok_tani"]').value = firstData.kelompok_tani;
+                kelompokTaniInput.value = firstData.kelompok_tani;
             }
+            
+            // Lock biodata fields (readonly)
+            namaInput.setAttribute('readonly', 'readonly');
+            namaInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            alamatInput.setAttribute('readonly', 'readonly');
+            alamatInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            nomorHapeInput.setAttribute('readonly', 'readonly');
+            nomorHapeInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            kelompokTaniInput.setAttribute('readonly', 'readonly');
+            kelompokTaniInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            nikInputEl.setAttribute('readonly', 'readonly');
+            nikInputEl.classList.add('bg-gray-100', 'cursor-not-allowed');
             
             // Hide modal
             hideModal();
-            nikStatus.textContent = '✅ Menggunakan data yang sudah ada';
+            nikStatus.textContent = '✅ Menggunakan data yang sudah ada (biodata terkunci)';
             nikStatus.className = 'text-sm text-green-600';
             nikInput.classList.remove('border-yellow-500', 'ring-2', 'ring-yellow-200');
             nikInput.classList.add('border-green-500', 'ring-2', 'ring-green-200');

@@ -74,10 +74,11 @@
 
                 <div>
                     <label class="block text-gray-700 text-sm font-medium mb-2">Jenis Bantuan *</label>
-                    <select name="jenis_bantuan" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                    <select name="jenis_bantuan" id="jenisBantuanSelect" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
                         <option value="">Pilih Jenis Bantuan</option>
                         @foreach($bantuan_list as $bantuan)
                             <option value="{{ $bantuan->nama_bantuan }}" 
+                                data-satuan="{{ $bantuan->satuan }}"
                                 {{ old('jenis_bantuan', $beneficiary->jenis_bantuan) == $bantuan->nama_bantuan ? 'selected' : '' }}>
                                 {{ $bantuan->nama_bantuan }}
                             </option>
@@ -100,9 +101,12 @@
 
                 <div>
                     <label class="block text-gray-700 text-sm font-medium mb-2">Kuantitas</label>
-                    <input type="number" name="kuantitas" value="{{ old('kuantitas', $beneficiary->kuantitas) }}" 
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                           min="1" placeholder="Jumlah bantuan">
+                    <div class="flex items-center space-x-2">
+                        <input type="number" name="kuantitas" value="{{ old('kuantitas', $beneficiary->kuantitas) }}" 
+                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2" 
+                               min="1" placeholder="Jumlah bantuan">
+                        <span id="satuanText" class="text-gray-600 font-medium">-</span>
+                    </div>
                     @error('kuantitas')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -487,6 +491,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========== Sumber Dana Toggle ==========
     const sumberDanaSelect = document.getElementById('sumberDanaSelect');
     const sumberDanaLainnya = document.getElementById('sumberDanaLainnya');
+    const jenisBantuanSelect = document.getElementById('jenisBantuanSelect');
+    const satuanText = document.getElementById('satuanText');
+
+    if (jenisBantuanSelect && satuanText) {
+        function updateSatuan() {
+            const selectedOption = jenisBantuanSelect.options[jenisBantuanSelect.selectedIndex];
+            const satuan = selectedOption.getAttribute('data-satuan');
+            satuanText.textContent = satuan || '-';
+        }
+        
+        updateSatuan();
+        
+        jenisBantuanSelect.addEventListener('change', updateSatuan);
+    }
 
     if (sumberDanaSelect && sumberDanaLainnya) {
         // Check initial value
